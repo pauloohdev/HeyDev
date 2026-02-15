@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { ServiceCard } from '../components/ServiceCard';
-import { services } from '../data/mockData';
+import { applications, services } from '../data/mockData';
 import { colors } from '../theme/colors';
 import type { MainTabParamList, UserType } from '../types/navigation';
 
@@ -17,9 +17,14 @@ export function FeedScreen({ userType, onOpenService }: Props) {
   const [tagInput, setTagInput] = useState('');
 
   const availableTags = useMemo(() => Array.from(new Set(services.flatMap((service) => service.stack))), []);
+  const appliedServiceIds = useMemo(() => new Set(applications.map((application) => application.serviceId)), []);
 
   const normalizedSearchTag = tagInput.trim().toLowerCase();
   const filteredServices = services.filter((service) => {
+    if (userType === 'developer' && appliedServiceIds.has(service.id)) {
+      return false;
+    }
+
     const serviceTags = service.stack.map((tag) => tag.toLowerCase());
     const selectedMatch = selectedTags.length === 0 || selectedTags.every((tag) => serviceTags.includes(tag.toLowerCase()));
     const typedMatch = !normalizedSearchTag || serviceTags.some((tag) => tag.includes(normalizedSearchTag));
@@ -28,6 +33,11 @@ export function FeedScreen({ userType, onOpenService }: Props) {
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag]));
+  };
+
+  const fillGlobalFilterFromTag = (tag: string) => {
+    setTagInput(tag);
+    setSelectedTags((prev) => (prev.includes(tag) ? prev : [...prev, tag]));
   };
 
   return (
@@ -53,7 +63,7 @@ export function FeedScreen({ userType, onOpenService }: Props) {
       </ScrollView>
 
       {filteredServices.map((service) => (
-        <ServiceCard key={service.id} service={service} onPress={() => onOpenService(service.id)} />
+        <ServiceCard key={service.id} service={service} userType={userType} onTagPress={fillGlobalFilterFromTag} onPress={() => onOpenService(service.id)} />
       ))}
       {filteredServices.length === 0 && <Text style={styles.empty}>Nenhum serviço encontrado para os filtros selecionados.</Text>}
       <View style={{ height: 20 }} />

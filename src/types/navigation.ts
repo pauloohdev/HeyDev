@@ -11,6 +11,8 @@ export type Service = {
   level: 'Júnior' | 'Pleno' | 'Sênior';
 };
 
+export type ServiceProgressStatus = 'open' | 'development' | 'review' | 'completed';
+
 export type Candidate = {
   id: string;
   name: string;
@@ -18,7 +20,7 @@ export type Candidate = {
   score: string;
 };
 
-export type CompanyServiceStatus = 'selection' | 'hired' | 'completed';
+export type CompanyServiceStatus = ServiceProgressStatus;
 
 export type CompanyService = {
   id: string;
@@ -28,6 +30,7 @@ export type CompanyService = {
   hiredCandidateId?: string;
   conversationId?: string;
   conversationTitle?: string;
+  notes?: string;
 };
 
 export type RootStackParamList = {
@@ -36,7 +39,7 @@ export type RootStackParamList = {
   Main: undefined;
   ServiceDetails: { serviceId: string };
   ServiceRequestSuccess: { serviceId: string };
-  Chat: { conversationId: string; title: string };
+  Chat: { conversationId: string; title: string; serviceId?: string; readOnly?: boolean };
   Conversations: undefined;
   Notifications: undefined;
   Candidates: { serviceId: string };

@@ -20,7 +20,7 @@ import { ServiceDetailsScreen } from '../screens/ServiceDetailsScreen';
 import { ServiceRequestSuccessScreen } from '../screens/ServiceRequestSuccessScreen';
 import { initialCompanyServices } from '../data/mockData';
 import { colors } from '../theme/colors';
-import type { CompanyService, MainTabParamList, RootStackParamList, UserType } from '../types/navigation';
+import type { CompanyService, MainTabParamList, RootStackParamList, ServiceProgressStatus, UserType } from '../types/navigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tabs = createBottomTabNavigator<MainTabParamList>();
@@ -30,7 +30,17 @@ type Props = {
   onSelectUserType: (type: UserType) => void;
 };
 
-function MainTabs({ userType, companyServices, onHireCandidate }: { userType: UserType; companyServices: CompanyService[]; onHireCandidate: (serviceId: string, candidateId: string, candidateName: string) => void }) {
+function MainTabs({
+  userType,
+  companyServices,
+  onHireCandidate,
+  onOpenChat
+}: {
+  userType: UserType;
+  companyServices: CompanyService[];
+  onHireCandidate: (serviceId: string, candidateId: string, candidateName: string) => void;
+  onOpenChat: (conversationId: string, title: string, serviceId?: string, readOnly?: boolean) => void;
+}) {
   return (
     <Tabs.Navigator
       screenOptions={({ navigation }) => ({
@@ -57,7 +67,7 @@ function MainTabs({ userType, companyServices, onHireCandidate }: { userType: Us
       </Tabs.Screen>
       {userType === 'developer' && (
         <Tabs.Screen name="Applications">
-          {(props) => <ApplicationsScreen {...props} onOpenChat={(conversationId, title) => props.navigation.getParent()?.navigate('Chat', { conversationId, title })} />}
+          {(props) => <ApplicationsScreen {...props} onOpenChat={(conversationId, title) => onOpenChat(conversationId, title)} />}
         </Tabs.Screen>
       )}
       <Tabs.Screen name="MyServices">
@@ -68,7 +78,7 @@ function MainTabs({ userType, companyServices, onHireCandidate }: { userType: Us
             companyServices={companyServices}
             onOpenCandidates={(serviceId) => props.navigation.getParent()?.navigate('Candidates', { serviceId })}
             onOpenService={(serviceId) => props.navigation.getParent()?.navigate('ServiceDetails', { serviceId })}
-            onOpenChat={(conversationId, title) => props.navigation.getParent()?.navigate('Chat', { conversationId, title })}
+            onOpenChat={onOpenChat}
           />
         )}
       </Tabs.Screen>
@@ -81,13 +91,17 @@ function MainTabs({ userType, companyServices, onHireCandidate }: { userType: Us
 export function AppNavigator({ onSelectUserType, userType }: Props) {
   const [companyServices, setCompanyServices] = useState<CompanyService[]>(initialCompanyServices);
 
+  const handleOpenChat = (conversationId: string, title: string, serviceId?: string, readOnly?: boolean) => {
+    return { conversationId, title, serviceId, readOnly };
+  };
+
   const handleHireCandidate = (serviceId: string, candidateId: string, candidateName: string) => {
     setCompanyServices((previous) =>
       previous.map((service) =>
         service.id === serviceId
           ? {
               ...service,
-              status: 'hired',
+              status: 'development',
               hiredCandidateId: candidateId,
               conversationId: `conv-${serviceId}-${candidateId}`,
               conversationTitle: `${service.title} • ${candidateName}`
@@ -95,6 +109,14 @@ export function AppNavigator({ onSelectUserType, userType }: Props) {
           : service
       )
     );
+  };
+
+  const handleUpdateServiceStatus = (serviceId: string, status: ServiceProgressStatus) => {
+    setCompanyServices((previous) => previous.map((service) => (service.id === serviceId ? { ...service, status } : service)));
+  };
+
+  const handleUpdateServiceNotes = (serviceId: string, notes: string) => {
+    setCompanyServices((previous) => previous.map((service) => (service.id === serviceId ? { ...service, notes } : service)));
   };
 
   return (
@@ -117,10 +139,26 @@ export function AppNavigator({ onSelectUserType, userType }: Props) {
         </Stack.Screen>
         <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Entrar' }} />
         <Stack.Screen name="Main" options={{ headerShown: false }}>
-          {() => <MainTabs userType={userType} companyServices={companyServices} onHireCandidate={handleHireCandidate} />}
+          {(props) => (
+            <MainTabs
+              userType={userType}
+              companyServices={companyServices}
+              onHireCandidate={handleHireCandidate}
+              onOpenChat={(conversationId, title, serviceId, readOnly) => props.navigation.navigate('Chat', handleOpenChat(conversationId, title, serviceId, readOnly))}
+            />
+          )}
         </Stack.Screen>
         <Stack.Screen name="ServiceDetails" options={{ title: 'Detalhes do serviço' }}>
-          {(props) => <ServiceDetailsScreen {...props} userType={userType} />}
+          {(props) => (
+            <ServiceDetailsScreen
+              {...props}
+              userType={userType}
+              companyServices={companyServices}
+              onUpdateServiceStatus={handleUpdateServiceStatus}
+              onUpdateServiceNotes={handleUpdateServiceNotes}
+              onOpenChat={(conversationId, title, serviceId, readOnly) => props.navigation.navigate('Chat', handleOpenChat(conversationId, title, serviceId, readOnly))}
+            />
+          )}
         </Stack.Screen>
         <Stack.Screen name="ServiceRequestSuccess" component={ServiceRequestSuccessScreen} options={{ title: 'Solicitação' }} />
         <Stack.Screen name="Chat" component={ChatScreen} options={{ title: 'Chat' }} />
@@ -133,7 +171,7 @@ export function AppNavigator({ onSelectUserType, userType }: Props) {
             <CandidatesScreen
               {...props}
               companyServices={companyServices}
-              onOpenChat={(conversationId, title) => props.navigation.navigate('Chat', { conversationId, title })}
+              onOpenChat={(conversationId, title, serviceId, readOnly) => props.navigation.navigate('Chat', handleOpenChat(conversationId, title, serviceId, readOnly))}
               onHireCandidate={handleHireCandidate}
             />
           )}
