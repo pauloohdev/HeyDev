@@ -2,6 +2,7 @@ import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { ApplicationsScreen } from '../screens/ApplicationsScreen';
@@ -17,8 +18,9 @@ import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { ServiceDetailsScreen } from '../screens/ServiceDetailsScreen';
 import { ServiceRequestSuccessScreen } from '../screens/ServiceRequestSuccessScreen';
+import { initialCompanyServices } from '../data/mockData';
 import { colors } from '../theme/colors';
-import type { MainTabParamList, RootStackParamList, UserType } from '../types/navigation';
+import type { CompanyService, MainTabParamList, RootStackParamList, UserType } from '../types/navigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tabs = createBottomTabNavigator<MainTabParamList>();
@@ -28,7 +30,7 @@ type Props = {
   onSelectUserType: (type: UserType) => void;
 };
 
-function MainTabs({ userType }: { userType: UserType }) {
+function MainTabs({ userType, companyServices, onHireCandidate }: { userType: UserType; companyServices: CompanyService[]; onHireCandidate: (serviceId: string, candidateId: string, candidateName: string) => void }) {
   return (
     <Tabs.Navigator
       screenOptions={({ navigation }) => ({
@@ -51,16 +53,19 @@ function MainTabs({ userType }: { userType: UserType }) {
       })}
     >
       <Tabs.Screen name="Feed">
-        {(props) => <FeedScreen {...props} onOpenService={(serviceId) => props.navigation.getParent()?.navigate('ServiceDetails', { serviceId })} />}
+        {(props) => <FeedScreen {...props} userType={userType} onOpenService={(serviceId) => props.navigation.getParent()?.navigate('ServiceDetails', { serviceId })} />}
       </Tabs.Screen>
-      <Tabs.Screen name="Applications">
-        {(props) => <ApplicationsScreen {...props} onOpenChat={(conversationId, title) => props.navigation.getParent()?.navigate('Chat', { conversationId, title })} />}
-      </Tabs.Screen>
+      {userType === 'developer' && (
+        <Tabs.Screen name="Applications">
+          {(props) => <ApplicationsScreen {...props} onOpenChat={(conversationId, title) => props.navigation.getParent()?.navigate('Chat', { conversationId, title })} />}
+        </Tabs.Screen>
+      )}
       <Tabs.Screen name="MyServices">
         {(props) => (
           <MyServicesScreen
             {...props}
             userType={userType}
+            companyServices={companyServices}
             onOpenCandidates={(serviceId) => props.navigation.getParent()?.navigate('Candidates', { serviceId })}
             onOpenService={(serviceId) => props.navigation.getParent()?.navigate('ServiceDetails', { serviceId })}
             onOpenChat={(conversationId, title) => props.navigation.getParent()?.navigate('Chat', { conversationId, title })}
@@ -74,6 +79,24 @@ function MainTabs({ userType }: { userType: UserType }) {
 }
 
 export function AppNavigator({ onSelectUserType, userType }: Props) {
+  const [companyServices, setCompanyServices] = useState<CompanyService[]>(initialCompanyServices);
+
+  const handleHireCandidate = (serviceId: string, candidateId: string, candidateName: string) => {
+    setCompanyServices((previous) =>
+      previous.map((service) =>
+        service.id === serviceId
+          ? {
+              ...service,
+              status: 'hired',
+              hiredCandidateId: candidateId,
+              conversationId: `conv-${serviceId}-${candidateId}`,
+              conversationTitle: `${service.title} • ${candidateName}`
+            }
+          : service
+      )
+    );
+  };
+
   return (
     <NavigationContainer
       theme={{
@@ -94,16 +117,27 @@ export function AppNavigator({ onSelectUserType, userType }: Props) {
         </Stack.Screen>
         <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Entrar' }} />
         <Stack.Screen name="Main" options={{ headerShown: false }}>
-          {() => <MainTabs userType={userType} />}
+          {() => <MainTabs userType={userType} companyServices={companyServices} onHireCandidate={handleHireCandidate} />}
         </Stack.Screen>
-        <Stack.Screen name="ServiceDetails" component={ServiceDetailsScreen} options={{ title: 'Detalhes do serviço' }} />
+        <Stack.Screen name="ServiceDetails" options={{ title: 'Detalhes do serviço' }}>
+          {(props) => <ServiceDetailsScreen {...props} userType={userType} />}
+        </Stack.Screen>
         <Stack.Screen name="ServiceRequestSuccess" component={ServiceRequestSuccessScreen} options={{ title: 'Solicitação' }} />
         <Stack.Screen name="Chat" component={ChatScreen} options={{ title: 'Chat' }} />
         <Stack.Screen name="Conversations" component={ConversationsScreen} options={{ title: 'Conversas' }} />
         <Stack.Screen name="Notifications" options={{ title: 'Notificações' }}>
           {(props) => <NotificationsScreen {...props} userType={userType} />}
         </Stack.Screen>
-        <Stack.Screen name="Candidates" component={CandidatesScreen} options={{ title: 'Candidatos' }} />
+        <Stack.Screen name="Candidates" options={{ title: 'Candidatos' }}>
+          {(props) => (
+            <CandidatesScreen
+              {...props}
+              companyServices={companyServices}
+              onOpenChat={(conversationId, title) => props.navigation.navigate('Chat', { conversationId, title })}
+              onHireCandidate={handleHireCandidate}
+            />
+          )}
+        </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
   );

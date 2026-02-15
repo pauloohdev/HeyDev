@@ -2,18 +2,19 @@ import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { developerActiveServices, developerCompletedServices, myServices } from '../data/mockData';
+import { developerActiveServices, developerCompletedServices } from '../data/mockData';
 import { colors } from '../theme/colors';
-import type { MainTabParamList, UserType } from '../types/navigation';
+import type { CompanyService, MainTabParamList, UserType } from '../types/navigation';
 
 type Props = BottomTabScreenProps<MainTabParamList, 'MyServices'> & {
   userType: UserType;
+  companyServices: CompanyService[];
   onOpenCandidates: (serviceId: string) => void;
   onOpenService: (serviceId: string) => void;
   onOpenChat: (conversationId: string, title: string) => void;
 };
 
-export function MyServicesScreen({ userType, onOpenCandidates, onOpenService, onOpenChat }: Props) {
+export function MyServicesScreen({ userType, companyServices, onOpenCandidates, onOpenService, onOpenChat }: Props) {
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
 
   const totalBalance = useMemo(
@@ -22,18 +23,60 @@ export function MyServicesScreen({ userType, onOpenCandidates, onOpenService, on
   );
 
   if (userType === 'company') {
+    const activeServices = companyServices.filter((service) => service.status !== 'completed');
+    const completedServices = companyServices.filter((service) => service.status === 'completed');
+
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Serviços publicados</Text>
-        {myServices.map((service) => (
-          <View key={service.id} style={styles.card}>
-            <Text style={styles.cardTitle}>{service.title}</Text>
-            <Text style={styles.meta}>{service.status} • {service.proposals} propostas</Text>
-            <Pressable style={styles.btn} onPress={() => onOpenCandidates(service.id)}>
-              <Text style={styles.btnText}>Ver candidatos</Text>
-            </Pressable>
-          </View>
-        ))}
+        <Text style={styles.title}>Meus serviços</Text>
+
+        <View style={styles.tabsRow}>
+          <Pressable onPress={() => setActiveTab('active')} style={[styles.tab, activeTab === 'active' && styles.tabActive]}>
+            <Text style={[styles.tabText, activeTab === 'active' && styles.tabTextActive]}>Ativos</Text>
+          </Pressable>
+          <Pressable onPress={() => setActiveTab('completed')} style={[styles.tab, activeTab === 'completed' && styles.tabActive]}>
+            <Text style={[styles.tabText, activeTab === 'completed' && styles.tabTextActive]}>Encerrados</Text>
+          </Pressable>
+        </View>
+
+        {activeTab === 'active' ? (
+          activeServices.length > 0 ? (
+            activeServices.map((service) => (
+              <View key={service.id} style={styles.card}>
+                <Text style={styles.cardTitle}>{service.title}</Text>
+                {service.status === 'selection' ? (
+                  <>
+                    <Text style={styles.meta}>Fase de seleção • {service.proposals} candidaturas</Text>
+                    <Pressable style={styles.btn} onPress={() => onOpenCandidates(service.id)}>
+                      <Text style={styles.btnText}>Ver candidatos</Text>
+                    </Pressable>
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.meta}>Pós-contratação • Desenvolvedor contratado</Text>
+                    <Pressable
+                      style={styles.btn}
+                      onPress={() => service.conversationId && service.conversationTitle && onOpenChat(service.conversationId, service.conversationTitle)}
+                    >
+                      <Text style={styles.btnText}>Abrir chat</Text>
+                    </Pressable>
+                  </>
+                )}
+              </View>
+            ))
+          ) : (
+            <Text style={styles.emptyText}>Nenhum serviço ativo no momento.</Text>
+          )
+        ) : completedServices.length > 0 ? (
+          completedServices.map((service) => (
+            <View key={service.id} style={styles.card}>
+              <Text style={styles.cardTitle}>{service.title}</Text>
+              <Text style={styles.meta}>Serviço concluído • Histórico da empresa</Text>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.emptyText}>Ainda não há serviços encerrados.</Text>
+        )}
       </ScrollView>
     );
   }
@@ -106,5 +149,6 @@ const styles = StyleSheet.create({
   balanceCard: { backgroundColor: '#102432', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#275878' },
   balanceLabel: { color: colors.muted, fontSize: 12 },
   balanceValue: { color: colors.success, fontSize: 24, fontWeight: '800' },
-  value: { color: colors.success, fontWeight: '700' }
+  value: { color: colors.success, fontWeight: '700' },
+  emptyText: { color: colors.muted, textAlign: 'center', marginTop: 24 }
 });
