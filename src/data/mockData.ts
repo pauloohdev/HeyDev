@@ -1,4 +1,4 @@
-import type { Service, UserType } from '../types/navigation';
+import type { Candidate, CompanyService, Service, UserType } from '../types/navigation';
 
 export const services: Service[] = [
   {
@@ -38,9 +38,26 @@ export const applications = [
   { id: 'app-2', serviceId: 'svc-2', status: 'Entrevista marcada', updatedAt: 'Ontem, 15:00' }
 ];
 
-export const myServices = [
-  { id: 'svc-11', title: 'Migrar app para Expo', proposals: 12, status: 'Ativo' },
-  { id: 'svc-12', title: 'Design System mobile', proposals: 8, status: 'Encerrando' }
+export const initialCompanyServices: CompanyService[] = [
+  { id: 'svc-11', title: 'Migrar app para Expo', proposals: 12, status: 'selection' },
+  {
+    id: 'svc-12',
+    title: 'Design System mobile',
+    proposals: 8,
+    status: 'hired',
+    hiredCandidateId: 'cand-2',
+    conversationId: 'conv-cand-2-svc-12',
+    conversationTitle: 'Design System mobile • Carlos Lima'
+  },
+  {
+    id: 'svc-13',
+    title: 'Landing page institucional com animações',
+    proposals: 6,
+    status: 'completed',
+    hiredCandidateId: 'cand-1',
+    conversationId: 'conv-cand-1-svc-13',
+    conversationTitle: 'Landing Page • Ana Souza'
+  }
 ];
 
 export const developerActiveServices = [
@@ -53,7 +70,7 @@ export const developerCompletedServices = [
   { id: 'svc-21', title: 'Otimização de performance React Native', company: 'Motion Apps', earned: 3600 }
 ];
 
-export const candidates = [
+export const candidates: Candidate[] = [
   { id: 'cand-1', name: 'Ana Souza', level: 'Sênior', score: '98%' },
   { id: 'cand-2', name: 'Carlos Lima', level: 'Pleno', score: '91%' },
   { id: 'cand-3', name: 'Marina Alves', level: 'Júnior', score: '87%' }

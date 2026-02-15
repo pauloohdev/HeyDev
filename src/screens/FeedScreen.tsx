@@ -5,13 +5,14 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-
 import { ServiceCard } from '../components/ServiceCard';
 import { services } from '../data/mockData';
 import { colors } from '../theme/colors';
-import type { MainTabParamList } from '../types/navigation';
+import type { MainTabParamList, UserType } from '../types/navigation';
 
 type Props = BottomTabScreenProps<MainTabParamList, 'Feed'> & {
+  userType: UserType;
   onOpenService: (serviceId: string) => void;
 };
 
-export function FeedScreen({ onOpenService }: Props) {
+export function FeedScreen({ userType, onOpenService }: Props) {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
 
@@ -32,6 +33,7 @@ export function FeedScreen({ onOpenService }: Props) {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Feed de serviços</Text>
+      {userType === 'company' && <Text style={styles.notice}>Visualização apenas: acompanhe as vagas sem solicitar serviços.</Text>}
       <TextInput
         value={tagInput}
         onChangeText={setTagInput}
@@ -63,6 +65,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   content: { padding: 16, gap: 12 },
   title: { color: colors.text, fontSize: 22, fontWeight: '700', marginBottom: 2 },
+  notice: { color: colors.muted, marginTop: -2 },
   input: { backgroundColor: colors.card, color: colors.text, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10 },
   tagsRow: { gap: 8, paddingVertical: 2 },
   tagBtn: { backgroundColor: '#11203a', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7 },

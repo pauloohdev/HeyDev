@@ -11,6 +11,25 @@ export type Service = {
   level: 'Júnior' | 'Pleno' | 'Sênior';
 };
 
+export type Candidate = {
+  id: string;
+  name: string;
+  level: 'Júnior' | 'Pleno' | 'Sênior';
+  score: string;
+};
+
+export type CompanyServiceStatus = 'selection' | 'hired' | 'completed';
+
+export type CompanyService = {
+  id: string;
+  title: string;
+  proposals: number;
+  status: CompanyServiceStatus;
+  hiredCandidateId?: string;
+  conversationId?: string;
+  conversationTitle?: string;
+};
+
 export type RootStackParamList = {
   Onboarding: undefined;
   Login: undefined;
