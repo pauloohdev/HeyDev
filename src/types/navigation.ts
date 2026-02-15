@@ -18,6 +18,8 @@ export type RootStackParamList = {
   ServiceDetails: { serviceId: string };
   ServiceRequestSuccess: { serviceId: string };
   Chat: { conversationId: string; title: string };
+  Conversations: undefined;
+  Notifications: undefined;
   Candidates: { serviceId: string };
 };
 
