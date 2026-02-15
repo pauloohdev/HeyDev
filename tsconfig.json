@@ -4,6 +4,5 @@
     "strict": true,
     "noEmit": true
   },
-  "include": ["App.tsx", "src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["src/app/**", "src/main.tsx", "src/styles/**"]
+  "include": ["App.tsx", "src/**/*.ts", "src/**/*.tsx"]
 }
