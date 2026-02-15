@@ -1,30 +1,87 @@
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { myServices } from '../data/mockData';
+import { developerActiveServices, developerCompletedServices, myServices } from '../data/mockData';
 import { colors } from '../theme/colors';
 import type { MainTabParamList, UserType } from '../types/navigation';
 
 type Props = BottomTabScreenProps<MainTabParamList, 'MyServices'> & {
   userType: UserType;
   onOpenCandidates: (serviceId: string) => void;
+  onOpenService: (serviceId: string) => void;
+  onOpenChat: (conversationId: string, title: string) => void;
 };
 
-export function MyServicesScreen({ userType, onOpenCandidates }: Props) {
-  return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>{userType === 'company' ? 'Serviços publicados' : 'Meus serviços'}</Text>
-      {myServices.map((service) => (
-        <View key={service.id} style={styles.card}>
-          <Text style={styles.cardTitle}>{service.title}</Text>
-          <Text style={styles.meta}>{service.status} • {service.proposals} propostas</Text>
-          {userType === 'company' && (
+export function MyServicesScreen({ userType, onOpenCandidates, onOpenService, onOpenChat }: Props) {
+  const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
+
+  const totalBalance = useMemo(
+    () => developerCompletedServices.reduce((sum, service) => sum + service.earned, 0),
+    []
+  );
+
+  if (userType === 'company') {
+    return (
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <Text style={styles.title}>Serviços publicados</Text>
+        {myServices.map((service) => (
+          <View key={service.id} style={styles.card}>
+            <Text style={styles.cardTitle}>{service.title}</Text>
+            <Text style={styles.meta}>{service.status} • {service.proposals} propostas</Text>
             <Pressable style={styles.btn} onPress={() => onOpenCandidates(service.id)}>
               <Text style={styles.btnText}>Ver candidatos</Text>
             </Pressable>
-          )}
-        </View>
-      ))}
+          </View>
+        ))}
+      </ScrollView>
+    );
+  }
+
+  return (
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <Text style={styles.title}>Meus serviços</Text>
+
+      <View style={styles.tabsRow}>
+        <Pressable onPress={() => setActiveTab('active')} style={[styles.tab, activeTab === 'active' && styles.tabActive]}>
+          <Text style={[styles.tabText, activeTab === 'active' && styles.tabTextActive]}>Em andamento/Ativos</Text>
+        </Pressable>
+        <Pressable onPress={() => setActiveTab('completed')} style={[styles.tab, activeTab === 'completed' && styles.tabActive]}>
+          <Text style={[styles.tabText, activeTab === 'completed' && styles.tabTextActive]}>Concluídos</Text>
+        </Pressable>
+      </View>
+
+      {activeTab === 'active' ? (
+        developerActiveServices.map((service) => (
+          <View key={service.id} style={styles.card}>
+            <Text style={styles.cardTitle}>{service.title}</Text>
+            <Text style={styles.meta}>{service.company}</Text>
+            <View style={styles.actionsRow}>
+              <Pressable style={styles.secondaryBtn} onPress={() => onOpenService(service.id)}>
+                <Text style={styles.secondaryBtnText}>Detalhes do serviço</Text>
+              </Pressable>
+              <Pressable style={styles.btn} onPress={() => onOpenChat(service.conversationId, service.conversationTitle)}>
+                <Text style={styles.btnText}>Chat do serviço</Text>
+              </Pressable>
+            </View>
+          </View>
+        ))
+      ) : (
+        <>
+          <View style={styles.balanceCard}>
+            <Text style={styles.balanceLabel}>Saldo total acumulado</Text>
+            <Text style={styles.balanceValue}>R$ {totalBalance.toLocaleString('pt-BR')}</Text>
+          </View>
+
+          {developerCompletedServices.map((service) => (
+            <View key={service.id} style={styles.card}>
+              <Text style={styles.cardTitle}>{service.title}</Text>
+              <Text style={styles.meta}>{service.company} • Finalizado</Text>
+              <Text style={styles.value}>+ R$ {service.earned.toLocaleString('pt-BR')}</Text>
+            </View>
+          ))}
+        </>
+      )}
     </ScrollView>
   );
 }
@@ -33,9 +90,21 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   content: { padding: 16, gap: 12 },
   title: { color: colors.text, fontSize: 22, fontWeight: '700' },
+  tabsRow: { flexDirection: 'row', gap: 8 },
+  tab: { flex: 1, borderRadius: 10, backgroundColor: '#11203a', paddingVertical: 10, paddingHorizontal: 8 },
+  tabActive: { backgroundColor: colors.primary },
+  tabText: { color: colors.primary, textAlign: 'center', fontWeight: '600', fontSize: 12 },
+  tabTextActive: { color: '#0b1120' },
   card: { backgroundColor: colors.card, borderRadius: 12, padding: 14, gap: 8 },
   cardTitle: { color: colors.text, fontWeight: '700' },
   meta: { color: colors.muted },
+  actionsRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
   btn: { backgroundColor: colors.primary, alignSelf: 'flex-start', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8 },
-  btnText: { color: '#0b1120', fontWeight: '700' }
+  btnText: { color: '#0b1120', fontWeight: '700' },
+  secondaryBtn: { backgroundColor: '#11203a', alignSelf: 'flex-start', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8 },
+  secondaryBtnText: { color: colors.text, fontWeight: '600' },
+  balanceCard: { backgroundColor: '#102432', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#275878' },
+  balanceLabel: { color: colors.muted, fontSize: 12 },
+  balanceValue: { color: colors.success, fontSize: 24, fontWeight: '800' },
+  value: { color: colors.success, fontWeight: '700' }
 });

@@ -1,14 +1,18 @@
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
+import { Pressable, View } from 'react-native';
 
 import { ApplicationsScreen } from '../screens/ApplicationsScreen';
 import { CandidatesScreen } from '../screens/CandidatesScreen';
 import { ChatScreen } from '../screens/ChatScreen';
+import { ConversationsScreen } from '../screens/ConversationsScreen';
 import { CreateServiceScreen } from '../screens/CreateServiceScreen';
 import { FeedScreen } from '../screens/FeedScreen';
 import { LoginScreen } from '../screens/LoginScreen';
 import { MyServicesScreen } from '../screens/MyServicesScreen';
+import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { ServiceDetailsScreen } from '../screens/ServiceDetailsScreen';
@@ -27,14 +31,24 @@ type Props = {
 function MainTabs({ userType }: { userType: UserType }) {
   return (
     <Tabs.Navigator
-      screenOptions={{
+      screenOptions={({ navigation }) => ({
         headerStyle: { backgroundColor: colors.bg },
         headerTintColor: colors.text,
         tabBarStyle: { backgroundColor: colors.card, borderTopColor: '#0b1220' },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.muted,
-        sceneStyle: { backgroundColor: colors.bg }
-      }}
+        sceneStyle: { backgroundColor: colors.bg },
+        headerRight: () => (
+          <View style={{ flexDirection: 'row', gap: 14 }}>
+            <Pressable onPress={() => navigation.getParent()?.navigate('Conversations')}>
+              <Ionicons name="chatbubble-ellipses-outline" size={22} color={colors.text} />
+            </Pressable>
+            <Pressable onPress={() => navigation.getParent()?.navigate('Notifications')}>
+              <Ionicons name="notifications-outline" size={22} color={colors.text} />
+            </Pressable>
+          </View>
+        )
+      })}
     >
       <Tabs.Screen name="Feed">
         {(props) => <FeedScreen {...props} onOpenService={(serviceId) => props.navigation.getParent()?.navigate('ServiceDetails', { serviceId })} />}
@@ -43,7 +57,15 @@ function MainTabs({ userType }: { userType: UserType }) {
         {(props) => <ApplicationsScreen {...props} onOpenChat={(conversationId, title) => props.navigation.getParent()?.navigate('Chat', { conversationId, title })} />}
       </Tabs.Screen>
       <Tabs.Screen name="MyServices">
-        {(props) => <MyServicesScreen {...props} userType={userType} onOpenCandidates={(serviceId) => props.navigation.getParent()?.navigate('Candidates', { serviceId })} />}
+        {(props) => (
+          <MyServicesScreen
+            {...props}
+            userType={userType}
+            onOpenCandidates={(serviceId) => props.navigation.getParent()?.navigate('Candidates', { serviceId })}
+            onOpenService={(serviceId) => props.navigation.getParent()?.navigate('ServiceDetails', { serviceId })}
+            onOpenChat={(conversationId, title) => props.navigation.getParent()?.navigate('Chat', { conversationId, title })}
+          />
+        )}
       </Tabs.Screen>
       {userType === 'company' && <Tabs.Screen name="CreateService" component={CreateServiceScreen} options={{ title: 'Criar' }} />}
       <Tabs.Screen name="Profile">{(props) => <ProfileScreen {...props} userType={userType} />}</Tabs.Screen>
@@ -77,6 +99,10 @@ export function AppNavigator({ onSelectUserType, userType }: Props) {
         <Stack.Screen name="ServiceDetails" component={ServiceDetailsScreen} options={{ title: 'Detalhes do serviço' }} />
         <Stack.Screen name="ServiceRequestSuccess" component={ServiceRequestSuccessScreen} options={{ title: 'Solicitação' }} />
         <Stack.Screen name="Chat" component={ChatScreen} options={{ title: 'Chat' }} />
+        <Stack.Screen name="Conversations" component={ConversationsScreen} options={{ title: 'Conversas' }} />
+        <Stack.Screen name="Notifications" options={{ title: 'Notificações' }}>
+          {(props) => <NotificationsScreen {...props} userType={userType} />}
+        </Stack.Screen>
         <Stack.Screen name="Candidates" component={CandidatesScreen} options={{ title: 'Candidatos' }} />
       </Stack.Navigator>
     </NavigationContainer>

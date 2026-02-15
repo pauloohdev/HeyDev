@@ -8,7 +8,7 @@ export const services: Service[] = [
     company: 'Tech Solutions',
     value: 'R$ 3.500',
     deadline: '5 dias',
-    stack: ['Node.js', 'JWT', 'TypeScript'],
+    stack: ['Node.js', 'JWT', 'TypeScript', 'Freelance'],
     level: 'Pleno'
   },
   {
@@ -18,7 +18,7 @@ export const services: Service[] = [
     company: 'Talent Hub',
     value: 'R$ 4.200',
     deadline: '8 dias',
-    stack: ['React Native', 'Recharts', 'API REST'],
+    stack: ['React Native', 'Mobile', 'API REST', 'UI/UX'],
     level: 'Sênior'
   },
   {
@@ -28,7 +28,7 @@ export const services: Service[] = [
     company: 'Blue Commerce',
     value: 'R$ 2.900',
     deadline: '6 dias',
-    stack: ['Expo', 'Payments', 'Testing'],
+    stack: ['Python', 'Payments', 'Testing', 'Freelance'],
     level: 'Júnior'
   }
 ];
@@ -41,6 +41,16 @@ export const applications = [
 export const myServices = [
   { id: 'svc-11', title: 'Migrar app para Expo', proposals: 12, status: 'Ativo' },
   { id: 'svc-12', title: 'Design System mobile', proposals: 8, status: 'Encerrando' }
+];
+
+export const developerActiveServices = [
+  { id: 'svc-1', title: 'Refatorar módulo de autenticação com JWT', company: 'Tech Solutions', conversationId: 'conv-1', conversationTitle: 'Tech Solutions' },
+  { id: 'svc-2', title: 'Criar dashboard de métricas para RH', company: 'Talent Hub', conversationId: 'conv-2', conversationTitle: 'Talent Hub' }
+];
+
+export const developerCompletedServices = [
+  { id: 'svc-3', title: 'Implementar checkout com PIX e cartão', company: 'Blue Commerce', earned: 2900 },
+  { id: 'svc-21', title: 'Otimização de performance React Native', company: 'Motion Apps', earned: 3600 }
 ];
 
 export const candidates = [
@@ -63,4 +73,19 @@ export const notificationsByUser: Record<UserType, { id: string; title: string; 
     { id: 'n-3', title: '3 novos candidatos para Migrar app para Expo', time: 'há 10 min' },
     { id: 'n-4', title: 'Serviço "Design System mobile" quase no prazo', time: 'há 2h' }
   ]
+};
+
+export const profileByUser: Record<UserType, { avatar: string; fullName: string; level: string; specializations: string[] }> = {
+  developer: {
+    avatar: 'LC',
+    fullName: 'Lucas Carvalho',
+    level: 'Sênior • 4.9 ★',
+    specializations: ['React', 'Node.js', 'UI/UX', 'TypeScript']
+  },
+  company: {
+    avatar: 'TH',
+    fullName: 'Talent Hub LTDA',
+    level: 'Parceiro Gold • 92 projetos',
+    specializations: ['Produto Digital', 'Mobile', 'Recrutamento Tech']
+  }
 };
