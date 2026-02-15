@@ -48,3 +48,8 @@ Atalhos:
 - `src/screens/*`: telas convertidas do web app para mobile
 - `src/components/ServiceCard.tsx`: card reutilizável de serviço
 - `src/data/mockData.ts`: dados mockados para fluxo completo
+
+## Compatibilidade de merge
+
+Para reduzir conflitos com branches antigos, os arquivos legados da versão web foram mantidos no repositório em `src/app/*` (não usados no runtime Expo).
+
