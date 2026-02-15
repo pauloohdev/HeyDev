@@ -39,15 +39,16 @@ export const applications = [
 ];
 
 export const initialCompanyServices: CompanyService[] = [
-  { id: 'svc-11', title: 'Migrar app para Expo', proposals: 12, status: 'selection' },
+  { id: 'svc-11', title: 'Migrar app para Expo', proposals: 12, status: 'open', notes: 'Backlog inicial aprovado.' },
   {
     id: 'svc-12',
     title: 'Design System mobile',
     proposals: 8,
-    status: 'hired',
+    status: 'development',
     hiredCandidateId: 'cand-2',
     conversationId: 'conv-cand-2-svc-12',
-    conversationTitle: 'Design System mobile • Carlos Lima'
+    conversationTitle: 'Design System mobile • Carlos Lima',
+    notes: 'Executar handoff no Figma e documentar tokens.'
   },
   {
     id: 'svc-13',
@@ -56,7 +57,8 @@ export const initialCompanyServices: CompanyService[] = [
     status: 'completed',
     hiredCandidateId: 'cand-1',
     conversationId: 'conv-cand-1-svc-13',
-    conversationTitle: 'Landing Page • Ana Souza'
+    conversationTitle: 'Landing Page • Ana Souza',
+    notes: 'Projeto entregue e aprovado.'
   }
 ];
 

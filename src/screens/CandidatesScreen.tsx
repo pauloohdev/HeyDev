@@ -1,17 +1,18 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { ChatActionButton } from '../components/ChatActionButton';
 import { candidates } from '../data/mockData';
 import { colors } from '../theme/colors';
 import type { CompanyService, RootStackParamList } from '../types/navigation';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Candidates'> & {
   companyServices: CompanyService[];
-  onOpenChat: (conversationId: string, title: string) => void;
+  onOpenChat: (conversationId: string, title: string, serviceId?: string, readOnly?: boolean) => void;
   onHireCandidate: (serviceId: string, candidateId: string, candidateName: string) => void;
 };
 
-export function CandidatesScreen({ route, companyServices, onOpenChat, onHireCandidate, navigation }: Props) {
+export function CandidatesScreen({ route, companyServices, onOpenChat, onHireCandidate }: Props) {
   const service = companyServices.find((item) => item.id === route.params.serviceId);
 
   const handleAnalyzeProfile = (candidateName: string) => {
@@ -24,21 +25,34 @@ export function CandidatesScreen({ route, companyServices, onOpenChat, onHireCan
 
   const handleHire = (candidateId: string, candidateName: string) => {
     if (!service) return;
-
     onHireCandidate(service.id, candidateId, candidateName);
-    Alert.alert('Contratação concluída', `${candidateName} foi contratado para este serviço.`, [
-      {
-        text: 'Abrir chat',
-        onPress: () => onOpenChat(`conv-${service.id}-${candidateId}`, `${service.title} • ${candidateName}`)
-      },
-      { text: 'Voltar para Meus Serviços', onPress: () => navigation.goBack() }
-    ]);
   };
+
+  if (!service) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Serviço não encontrado</Text>
+      </View>
+    );
+  }
+
+  if (service.status !== 'open' && service.conversationId && service.conversationTitle) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Gerenciamento do serviço</Text>
+        <Text style={styles.subtitle}>{service.title}</Text>
+        <View style={styles.card}>
+          <Text style={styles.meta}>Este serviço já saiu da fase de seleção.</Text>
+          <ChatActionButton onPress={() => onOpenChat(service.conversationId!, service.conversationTitle!, service.id, service.status === 'completed')} label="Ir para chat/gerenciamento" />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Candidatos</Text>
-      <Text style={styles.subtitle}>{service?.title ?? 'Serviço selecionado'}</Text>
+      <Text style={styles.subtitle}>{service.title}</Text>
 
       {candidates.map((candidate) => (
         <View key={candidate.id} style={styles.card}>
@@ -49,12 +63,7 @@ export function CandidatesScreen({ route, companyServices, onOpenChat, onHireCan
             <Pressable style={styles.secondaryBtn} onPress={() => handleAnalyzeProfile(candidate.name)}>
               <Text style={styles.secondaryBtnText}>Analisar perfil</Text>
             </Pressable>
-            <Pressable
-              style={styles.secondaryBtn}
-              onPress={() => onOpenChat(`conv-${route.params.serviceId}-${candidate.id}`, `${service?.title ?? 'Serviço'} • ${candidate.name}`)}
-            >
-              <Text style={styles.secondaryBtnText}>Abrir chat</Text>
-            </Pressable>
+            <ChatActionButton onPress={() => onOpenChat(`conv-${route.params.serviceId}-${candidate.id}`, `${service.title} • ${candidate.name}`, service.id)} />
             <Pressable style={styles.hireBtn} onPress={() => handleHire(candidate.id, candidate.name)}>
               <Text style={styles.hireBtnText}>Contratar</Text>
             </Pressable>
@@ -69,8 +78,8 @@ export function CandidatesScreen({ route, companyServices, onOpenChat, onHireCan
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: 16, gap: 10 },
+  container: { flex: 1, backgroundColor: colors.bg, padding: 16 },
+  content: { gap: 10 },
   title: { color: colors.text, fontSize: 24, fontWeight: '700' },
   subtitle: { color: colors.muted, marginBottom: 8 },
   card: { backgroundColor: colors.card, borderRadius: 12, padding: 12, gap: 8 },

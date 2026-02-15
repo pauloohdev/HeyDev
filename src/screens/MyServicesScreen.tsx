@@ -1,7 +1,9 @@
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { ChatActionButton } from '../components/ChatActionButton';
 import { developerActiveServices, developerCompletedServices } from '../data/mockData';
 import { colors } from '../theme/colors';
 import type { CompanyService, MainTabParamList, UserType } from '../types/navigation';
@@ -11,11 +13,12 @@ type Props = BottomTabScreenProps<MainTabParamList, 'MyServices'> & {
   companyServices: CompanyService[];
   onOpenCandidates: (serviceId: string) => void;
   onOpenService: (serviceId: string) => void;
-  onOpenChat: (conversationId: string, title: string) => void;
+  onOpenChat: (conversationId: string, title: string, serviceId?: string, readOnly?: boolean) => void;
 };
 
 export function MyServicesScreen({ userType, companyServices, onOpenCandidates, onOpenService, onOpenChat }: Props) {
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
+  const [showBalance, setShowBalance] = useState(true);
 
   const totalBalance = useMemo(
     () => developerCompletedServices.reduce((sum, service) => sum + service.earned, 0),
@@ -44,22 +47,33 @@ export function MyServicesScreen({ userType, companyServices, onOpenCandidates, 
             activeServices.map((service) => (
               <View key={service.id} style={styles.card}>
                 <Text style={styles.cardTitle}>{service.title}</Text>
-                {service.status === 'selection' ? (
+                {service.status === 'open' ? (
                   <>
-                    <Text style={styles.meta}>Fase de seleção • {service.proposals} candidaturas</Text>
-                    <Pressable style={styles.btn} onPress={() => onOpenCandidates(service.id)}>
-                      <Text style={styles.btnText}>Ver candidatos</Text>
-                    </Pressable>
+                    <Text style={styles.meta}>Fase aberta • {service.proposals} candidaturas</Text>
+                    <View style={styles.actionsRow}>
+                      <Pressable style={styles.btn} onPress={() => onOpenCandidates(service.id)}>
+                        <Text style={styles.btnText}>Ver candidatos</Text>
+                      </Pressable>
+                      <Pressable style={styles.secondaryBtn} onPress={() => onOpenService(service.id)}>
+                        <Text style={styles.secondaryBtnText}>Acompanhar progresso</Text>
+                      </Pressable>
+                    </View>
                   </>
                 ) : (
                   <>
-                    <Text style={styles.meta}>Pós-contratação • Desenvolvedor contratado</Text>
-                    <Pressable
-                      style={styles.btn}
-                      onPress={() => service.conversationId && service.conversationTitle && onOpenChat(service.conversationId, service.conversationTitle)}
-                    >
-                      <Text style={styles.btnText}>Abrir chat</Text>
-                    </Pressable>
+                    <Text style={styles.meta}>Serviço em execução</Text>
+                    <View style={styles.actionsRow}>
+                      <ChatActionButton
+                        onPress={() =>
+                          service.conversationId &&
+                          service.conversationTitle &&
+                          onOpenChat(service.conversationId, service.conversationTitle, service.id, service.status === 'completed')
+                        }
+                      />
+                      <Pressable style={styles.secondaryBtn} onPress={() => onOpenService(service.id)}>
+                        <Text style={styles.secondaryBtnText}>Acompanhar progresso</Text>
+                      </Pressable>
+                    </View>
                   </>
                 )}
               </View>
@@ -72,6 +86,9 @@ export function MyServicesScreen({ userType, companyServices, onOpenCandidates, 
             <View key={service.id} style={styles.card}>
               <Text style={styles.cardTitle}>{service.title}</Text>
               <Text style={styles.meta}>Serviço concluído • Histórico da empresa</Text>
+              <Pressable style={styles.secondaryBtn} onPress={() => onOpenService(service.id)}>
+                <Text style={styles.secondaryBtnText}>Ver detalhes</Text>
+              </Pressable>
             </View>
           ))
         ) : (
@@ -103,24 +120,27 @@ export function MyServicesScreen({ userType, companyServices, onOpenCandidates, 
               <Pressable style={styles.secondaryBtn} onPress={() => onOpenService(service.id)}>
                 <Text style={styles.secondaryBtnText}>Detalhes do serviço</Text>
               </Pressable>
-              <Pressable style={styles.btn} onPress={() => onOpenChat(service.conversationId, service.conversationTitle)}>
-                <Text style={styles.btnText}>Chat do serviço</Text>
-              </Pressable>
+              <ChatActionButton onPress={() => onOpenChat(service.conversationId, service.conversationTitle, service.id)} label="Chat do serviço" />
             </View>
           </View>
         ))
       ) : (
         <>
           <View style={styles.balanceCard}>
-            <Text style={styles.balanceLabel}>Saldo total acumulado</Text>
-            <Text style={styles.balanceValue}>R$ {totalBalance.toLocaleString('pt-BR')}</Text>
+            <View style={styles.balanceHeader}>
+              <Text style={styles.balanceLabel}>Saldo total acumulado</Text>
+              <Pressable onPress={() => setShowBalance((prev) => !prev)}>
+                <Ionicons name={showBalance ? 'eye-outline' : 'eye-off-outline'} size={20} color={colors.muted} />
+              </Pressable>
+            </View>
+            <Text style={styles.balanceValue}>{showBalance ? `R$ ${totalBalance.toLocaleString('pt-BR')}` : 'R$ ••••••'}</Text>
           </View>
 
           {developerCompletedServices.map((service) => (
             <View key={service.id} style={styles.card}>
               <Text style={styles.cardTitle}>{service.title}</Text>
               <Text style={styles.meta}>{service.company} • Finalizado</Text>
-              <Text style={styles.value}>+ R$ {service.earned.toLocaleString('pt-BR')}</Text>
+              <Text style={styles.value}>{showBalance ? `+ R$ ${service.earned.toLocaleString('pt-BR')}` : '+ R$ ••••'}</Text>
             </View>
           ))}
         </>
@@ -146,7 +166,8 @@ const styles = StyleSheet.create({
   btnText: { color: '#0b1120', fontWeight: '700' },
   secondaryBtn: { backgroundColor: '#11203a', alignSelf: 'flex-start', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8 },
   secondaryBtnText: { color: colors.text, fontWeight: '600' },
-  balanceCard: { backgroundColor: '#102432', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#275878' },
+  balanceCard: { backgroundColor: '#102432', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#275878', gap: 8 },
+  balanceHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   balanceLabel: { color: colors.muted, fontSize: 12 },
   balanceValue: { color: colors.success, fontSize: 24, fontWeight: '800' },
   value: { color: colors.success, fontWeight: '700' },
