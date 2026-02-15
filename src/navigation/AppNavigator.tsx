@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -28,24 +27,14 @@ type Props = {
 function MainTabs({ userType }: { userType: UserType }) {
   return (
     <Tabs.Navigator
-      screenOptions={({ route }) => ({
+      screenOptions={{
         headerStyle: { backgroundColor: colors.bg },
         headerTintColor: colors.text,
         tabBarStyle: { backgroundColor: colors.card, borderTopColor: '#0b1220' },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.muted,
-        sceneStyle: { backgroundColor: colors.bg },
-        tabBarIcon: ({ color, size }) => {
-          const iconByRoute: Record<string, keyof typeof Ionicons.glyphMap> = {
-            Feed: 'grid-outline',
-            Applications: 'document-text-outline',
-            MyServices: 'briefcase-outline',
-            CreateService: 'add-circle-outline',
-            Profile: 'person-outline'
-          };
-          return <Ionicons name={iconByRoute[route.name]} size={size} color={color} />;
-        }
-      })}
+        sceneStyle: { backgroundColor: colors.bg }
+      }}
     >
       <Tabs.Screen name="Feed">
         {(props) => <FeedScreen {...props} onOpenService={(serviceId) => props.navigation.getParent()?.navigate('ServiceDetails', { serviceId })} />}
