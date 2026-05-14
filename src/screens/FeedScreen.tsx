@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { ServiceCard } from '../components/ServiceCard';
-import { applications, services } from '../data/mockData';
+import { developerInvolvedServiceIds, services } from '../data/mockData';
 import { colors } from '../theme/colors';
 import type { MainTabParamList, UserType } from '../types/navigation';
 
@@ -18,11 +18,10 @@ export function FeedScreen({ userType, onOpenService }: Props) {
   const [tagInput, setTagInput] = useState('');
 
   const availableTags = useMemo(() => Array.from(new Set(services.flatMap((service) => service.stack))), []);
-  const appliedServiceIds = useMemo(() => new Set(applications.map((application) => application.serviceId)), []);
 
   const normalizedSearchTag = tagInput.trim().toLowerCase();
   const filteredServices = services.filter((service) => {
-    if (userType === 'developer' && appliedServiceIds.has(service.id)) {
+    if (userType === 'developer' && developerInvolvedServiceIds.has(service.id)) {
       return false;
     }
 

@@ -30,13 +30,41 @@ export const services: Service[] = [
     deadline: '6 dias',
     stack: ['Python', 'Payments', 'Testing', 'Freelance'],
     level: 'Júnior'
+  },
+  {
+    id: 'svc-4',
+    title: 'Desenvolver API de notificações push',
+    description: 'Serviço de push notifications com Firebase e fallback por email.',
+    company: 'Notify Corp',
+    value: 'R$ 3.800',
+    deadline: '7 dias',
+    stack: ['Node.js', 'Firebase', 'TypeScript', 'Mobile'],
+    level: 'Pleno'
+  },
+  {
+    id: 'svc-5',
+    title: 'Automatizar pipeline de CI/CD',
+    description: 'Configurar GitHub Actions com deploy automático para staging e produção.',
+    company: 'DevOps Lab',
+    value: 'R$ 2.500',
+    deadline: '4 dias',
+    stack: ['Docker', 'GitHub Actions', 'AWS', 'DevOps'],
+    level: 'Sênior'
   }
 ];
 
+// Candidaturas do DEV: svc-1 e svc-2 estão em análise (foram candidatados e aceitos → viraram serviços ativos)
+// svc-3 já foi concluído pelo DEV (está em developerCompletedServices)
+// svc-4 e svc-5 são serviços novos disponíveis no feed
 export const applications = [
-  { id: 'app-1', serviceId: 'svc-1', status: 'Em análise', updatedAt: 'Hoje, 10:20' },
-  { id: 'app-2', serviceId: 'svc-2', status: 'Entrevista marcada', updatedAt: 'Ontem, 15:00' }
+  { id: 'app-1', serviceId: 'svc-1', status: 'Proposta aceita', updatedAt: 'Hoje, 10:20', conversationId: 'conv-1' },
+  { id: 'app-2', serviceId: 'svc-2', status: 'Em análise', updatedAt: 'Ontem, 15:00', conversationId: 'conv-2' },
+  { id: 'app-3', serviceId: 'svc-3', status: 'Concluído', updatedAt: 'Há 2 semanas', conversationId: 'conv-3' }
 ];
+
+// IDs de todos os serviços que o DEV já se envolveu (candidatura + ativo + concluído)
+// Usado para filtrar esses serviços do feed
+export const developerInvolvedServiceIds = new Set(['svc-1', 'svc-2', 'svc-3']);
 
 export const initialCompanyServices: CompanyService[] = [
   { id: 'svc-11', title: 'Migrar app para Expo', proposals: 12, status: 'open', notes: 'Backlog inicial aprovado.' },
@@ -63,8 +91,7 @@ export const initialCompanyServices: CompanyService[] = [
 ];
 
 export const developerActiveServices = [
-  { id: 'svc-1', title: 'Refatorar módulo de autenticação com JWT', company: 'Tech Solutions', conversationId: 'conv-1', conversationTitle: 'Tech Solutions' },
-  { id: 'svc-2', title: 'Criar dashboard de métricas para RH', company: 'Talent Hub', conversationId: 'conv-2', conversationTitle: 'Talent Hub' }
+  { id: 'svc-1', title: 'Refatorar módulo de autenticação com JWT', company: 'Tech Solutions', conversationId: 'conv-1', conversationTitle: 'Tech Solutions' }
 ];
 
 export const developerCompletedServices = [
@@ -80,7 +107,7 @@ export const candidates: Candidate[] = [
 
 export const conversations = [
   { id: 'conv-1', title: 'Tech Solutions', lastMessage: 'Podemos alinhar o escopo?', unread: 2 },
-  { id: 'conv-2', title: 'Talent Hub', lastMessage: 'A entrevista foi confirmada.', unread: 0 }
+  { id: 'conv-2', title: 'Talent Hub', lastMessage: 'Estamos analisando sua proposta.', unread: 0 }
 ];
 
 export const notificationsByUser: Record<UserType, { id: string; title: string; time: string }[]> = {

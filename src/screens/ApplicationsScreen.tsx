@@ -55,7 +55,7 @@ export function ApplicationsScreen({ onOpenChat }: Props) {
 
             {/* Actions */}
             <View style={styles.actionsRow}>
-              <Pressable style={styles.chatBtn} onPress={() => onOpenChat('conv-1', service.company)}>
+              <Pressable style={styles.chatBtn} onPress={() => onOpenChat(application.conversationId, service.company)}>
                 <Ionicons name="chatbubble-outline" size={14} color={colors.primary} />
                 <Text style={styles.chatText}>Abrir chat</Text>
               </Pressable>

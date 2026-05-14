@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { ChatActionButton } from '../components/ChatActionButton';
-import { services } from '../data/mockData';
+import { developerActiveServices, developerInvolvedServiceIds, services } from '../data/mockData';
 import { colors } from '../theme/colors';
 import type { CompanyService, RootStackParamList, ServiceProgressStatus, UserType } from '../types/navigation';
 
@@ -225,10 +225,21 @@ export function ServiceDetailsScreen({ navigation, route, userType, companyServi
 
       {/* CTA */}
       {userType === 'developer' ? (
-        <Pressable style={styles.ctaBtn} onPress={() => navigation.navigate('ServiceRequestSuccess', { serviceId: feedService.id })}>
-          <Ionicons name="paper-plane-outline" size={18} color="#0b1120" />
-          <Text style={styles.ctaBtnText}>Solicitar serviço</Text>
-        </Pressable>
+        developerInvolvedServiceIds.has(feedService.id) ? (
+          <View style={styles.readOnlyBanner}>
+            <Ionicons name="checkmark-circle-outline" size={16} color={colors.success} />
+            <Text style={[styles.readOnlyBannerText, { color: colors.success }]}>
+              {developerActiveServices.some((s) => s.id === feedService.id)
+                ? 'Você já está trabalhando neste serviço.'
+                : 'Você já se candidatou ou concluiu este serviço.'}
+            </Text>
+          </View>
+        ) : (
+          <Pressable style={styles.ctaBtn} onPress={() => navigation.navigate('ServiceRequestSuccess', { serviceId: feedService.id })}>
+            <Ionicons name="paper-plane-outline" size={18} color="#0b1120" />
+            <Text style={styles.ctaBtnText}>Solicitar serviço</Text>
+          </Pressable>
+        )
       ) : (
         <View style={styles.readOnlyBanner}>
           <Ionicons name="information-circle-outline" size={16} color={colors.accent} />
