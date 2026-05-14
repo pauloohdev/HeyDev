@@ -2,4 +2,6 @@ node_modules/
 .expo/
 dist/
 web-build/
+build/
+.git/
 *.log

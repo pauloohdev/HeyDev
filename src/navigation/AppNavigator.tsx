@@ -10,6 +10,7 @@ import { CandidatesScreen } from '../screens/CandidatesScreen';
 import { ChatScreen } from '../screens/ChatScreen';
 import { ConversationsScreen } from '../screens/ConversationsScreen';
 import { CreateServiceScreen } from '../screens/CreateServiceScreen';
+import { EditProfileScreen } from '../screens/EditProfileScreen';
 import { FeedScreen } from '../screens/FeedScreen';
 import { LoginScreen } from '../screens/LoginScreen';
 import { MyServicesScreen } from '../screens/MyServicesScreen';
@@ -41,14 +42,38 @@ function MainTabs({
   onHireCandidate: (serviceId: string, candidateId: string, candidateName: string) => void;
   onOpenChat: (conversationId: string, title: string, serviceId?: string, readOnly?: boolean) => void;
 }) {
+  const getTabIcon = (routeName: string, focused: boolean): keyof typeof Ionicons.glyphMap => {
+    const icons: Record<string, [keyof typeof Ionicons.glyphMap, keyof typeof Ionicons.glyphMap]> = {
+      Feed: ['compass', 'compass-outline'],
+      Applications: ['document-text', 'document-text-outline'],
+      MyServices: ['briefcase', 'briefcase-outline'],
+      CreateService: ['add-circle', 'add-circle-outline'],
+      Profile: ['person', 'person-outline']
+    };
+    const pair = icons[routeName] ?? ['ellipse', 'ellipse-outline'];
+    return focused ? pair[0] : pair[1];
+  };
+
+  const tabLabels: Record<string, string> = {
+    Feed: 'Explorar',
+    Applications: 'Candidaturas',
+    MyServices: 'Serviços',
+    CreateService: 'Criar',
+    Profile: 'Perfil'
+  };
+
   return (
     <Tabs.Navigator
-      screenOptions={({ navigation }) => ({
+      screenOptions={({ route, navigation }) => ({
         headerStyle: { backgroundColor: colors.bg },
         headerTintColor: colors.text,
-        tabBarStyle: { backgroundColor: colors.card, borderTopColor: '#0b1220' },
+        tabBarStyle: { backgroundColor: colors.card, borderTopColor: '#0b1220', paddingTop: 4 },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.muted,
+        tabBarLabel: tabLabels[route.name] ?? route.name,
+        tabBarIcon: ({ focused, color, size }) => (
+          <Ionicons name={getTabIcon(route.name, focused)} size={size} color={color} />
+        ),
         sceneStyle: { backgroundColor: colors.bg },
         headerRight: () => (
           <View style={{ flexDirection: 'row', gap: 14 }}>
@@ -83,7 +108,15 @@ function MainTabs({
         )}
       </Tabs.Screen>
       {userType === 'company' && <Tabs.Screen name="CreateService" component={CreateServiceScreen} options={{ title: 'Criar' }} />}
-      <Tabs.Screen name="Profile">{(props) => <ProfileScreen {...props} userType={userType} />}</Tabs.Screen>
+      <Tabs.Screen name="Profile">
+        {(props) => (
+          <ProfileScreen
+            {...props}
+            userType={userType}
+            onEditProfile={() => props.navigation.getParent()?.navigate('EditProfile')}
+          />
+        )}
+      </Tabs.Screen>
     </Tabs.Navigator>
   );
 }
@@ -175,6 +208,9 @@ export function AppNavigator({ onSelectUserType, userType }: Props) {
               onHireCandidate={handleHireCandidate}
             />
           )}
+        </Stack.Screen>
+        <Stack.Screen name="EditProfile" options={{ title: 'Editar perfil' }}>
+          {(props) => <EditProfileScreen {...props} userType={userType} />}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>

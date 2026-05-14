@@ -43,6 +43,7 @@ export type RootStackParamList = {
   Conversations: undefined;
   Notifications: undefined;
   Candidates: { serviceId: string };
+  EditProfile: undefined;
 };
 
 export type MainTabParamList = {
