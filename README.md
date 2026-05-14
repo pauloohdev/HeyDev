@@ -1,10 +1,10 @@
 # HeyDev Mobile (Expo + React Native + TypeScript)
 
-Projeto totalmente convertido do web app para um app mobile com Expo.
+Projeto totalmente convertido do web app para um app mobile com Expo. (Doideira ta)
 
 ## Stack
 
-- Expo SDK 53
+- Expo SDK 54
 - React Native 0.79
 - TypeScript
 - React Navigation (stack + tabs)

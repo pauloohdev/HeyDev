@@ -1,11 +1,13 @@
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput as RNTextInput, View } from 'react-native';
 
 import { ServiceCard } from '../components/ServiceCard';
+import { Chip, EmptyState, Banner } from '../components/primitives';
 import { developerInvolvedServiceIds, services } from '../data/mockData';
 import { colors } from '../theme/colors';
+import { SPACING, RADIUS, FONT_SIZES } from '../theme/spacing';
 import type { MainTabParamList, UserType } from '../types/navigation';
 
 type Props = BottomTabScreenProps<MainTabParamList, 'Feed'> & {
@@ -55,16 +57,15 @@ export function FeedScreen({ userType, onOpenService }: Props) {
       </View>
 
       {userType === 'company' && (
-        <View style={styles.noticeBanner}>
-          <Ionicons name="information-circle-outline" size={16} color={colors.accent} />
-          <Text style={styles.noticeText}>Visualização apenas: acompanhe as vagas sem solicitar serviços.</Text>
-        </View>
+        <Banner variant="info">
+          Visualização apenas: acompanhe as vagas sem solicitar serviços.
+        </Banner>
       )}
 
       {/* Search */}
       <View style={styles.searchRow}>
         <Ionicons name="search-outline" size={18} color={colors.muted} style={styles.searchIcon} />
-        <TextInput
+        <RNTextInput
           value={tagInput}
           onChangeText={setTagInput}
           placeholder="Buscar por tag, stack ou tecnologia..."
@@ -83,10 +84,13 @@ export function FeedScreen({ userType, onOpenService }: Props) {
         {availableTags.map((tag) => {
           const active = selectedTags.includes(tag);
           return (
-            <Pressable key={tag} onPress={() => toggleTag(tag)} style={[styles.tagBtn, active && styles.tagBtnActive]}>
-              {active && <Ionicons name="checkmark" size={14} color="#0b1120" />}
-              <Text style={[styles.tagText, active && styles.tagTextActive]}>{tag}</Text>
-            </Pressable>
+            <Chip
+              key={tag}
+              label={tag}
+              active={active}
+              variant="filter"
+              onPress={() => toggleTag(tag)}
+            />
           );
         })}
       </ScrollView>
@@ -107,11 +111,11 @@ export function FeedScreen({ userType, onOpenService }: Props) {
 
       {/* Empty state */}
       {filteredServices.length === 0 && (
-        <View style={styles.emptyState}>
-          <Ionicons name="search" size={48} color={colors.cardSoft} />
-          <Text style={styles.emptyTitle}>Nenhum serviço encontrado</Text>
-          <Text style={styles.emptyDesc}>Tente ajustar os filtros ou buscar por outra tecnologia.</Text>
-        </View>
+        <EmptyState
+          icon="search"
+          title="Nenhum serviço encontrado"
+          description="Tente ajustar os filtros ou buscar por outra tecnologia."
+        />
       )}
       <View style={{ height: 20 }} />
     </ScrollView>
@@ -120,57 +124,31 @@ export function FeedScreen({ userType, onOpenService }: Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: 16, gap: 12 },
+  content: { padding: SPACING.lg, gap: SPACING.md },
   greetingRow: { marginBottom: 2 },
-  greeting: { color: colors.text, fontSize: 22, fontWeight: '800' },
-  greetingSub: { color: colors.muted, fontSize: 13, marginTop: 2 },
-  noticeBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: '#1a1a3e',
-    borderRadius: 10,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#2a2a5e'
-  },
-  noticeText: { color: colors.accent, fontSize: 13, flex: 1 },
+  greeting: { color: colors.text, fontSize: FONT_SIZES['3xl'], fontWeight: '800' },
+  greetingSub: { color: colors.muted, fontSize: FONT_SIZES.md, marginTop: 2 },
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.card,
-    borderRadius: 12,
-    paddingHorizontal: 12,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: SPACING.md,
     borderWidth: 1,
-    borderColor: '#1e3a5f'
+    borderColor: colors.border
   },
-  searchIcon: { marginRight: 8 },
-  searchInput: { flex: 1, color: colors.text, paddingVertical: 12, fontSize: 14 },
-  tagsRow: { gap: 8, paddingVertical: 2 },
-  tagBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#11203a',
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 7
-  },
-  tagBtnActive: { backgroundColor: colors.primary },
-  tagText: { color: colors.primary, fontWeight: '600', fontSize: 13 },
-  tagTextActive: { color: '#0b1120' },
+  searchIcon: { marginRight: SPACING.md },
+  searchInput: { flex: 1, color: colors.text, paddingVertical: SPACING.md, fontSize: FONT_SIZES.md },
+  tagsRow: { gap: SPACING.md, paddingVertical: 2 },
   clearFilters: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    gap: 6,
-    backgroundColor: '#0c2d4a',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 6
+    gap: SPACING.sm,
+    backgroundColor: colors.buttonBg,
+    borderRadius: RADIUS.sm,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm
   },
-  clearFiltersText: { color: colors.primary, fontSize: 12, fontWeight: '600' },
-  emptyState: { alignItems: 'center', gap: 8, paddingVertical: 40 },
-  emptyTitle: { color: colors.text, fontSize: 16, fontWeight: '700' },
-  emptyDesc: { color: colors.muted, fontSize: 13, textAlign: 'center' }
+  clearFiltersText: { color: colors.primary, fontSize: FONT_SIZES.xs, fontWeight: '600' }
 });
